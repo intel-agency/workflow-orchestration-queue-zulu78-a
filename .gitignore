@@ -343,6 +343,20 @@ paket-files/
 **/__pycache__/
 *.pyc
 
+# Python virtual environment
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+*.egg
+
+# uv lock file (optional - keep in sync with pyproject.toml)
+# uv.lock
+
 # Cake - Uncomment if you are using it
 #tools/**
 #!tools/packages.config
