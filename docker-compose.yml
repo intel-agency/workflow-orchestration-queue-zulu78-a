@@ -1,0 +1,56 @@
+# OS-APOW Docker Compose
+# Local development environment
+
+services:
+  notifier:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OS_APOW_GITHUB_TOKEN=${OS_APOW_GITHUB_TOKEN}
+      - OS_APOW_GITHUB_ORG=${OS_APOW_GITHUB_ORG}
+      - OS_APOW_GITHUB_REPO=${OS_APOW_GITHUB_REPO}
+      - OS_APOW_WEBHOOK_SECRET=${OS_APOW_WEBHOOK_SECRET}
+      - OS_APOW_WEBHOOK_PORT=8000
+      - OS_APOW_LOG_LEVEL=DEBUG
+      - OS_APOW_LOG_FORMAT=text
+    volumes:
+      - ./src:/app/src:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - os-apow-network
+
+  sentinel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "-c", "from os_apow.main import run_sentinel; run_sentinel()"]
+    environment:
+      - OS_APOW_GITHUB_TOKEN=${OS_APOW_GITHUB_TOKEN}
+      - OS_APOW_GITHUB_ORG=${OS_APOW_GITHUB_ORG}
+      - OS_APOW_GITHUB_REPO=${OS_APOW_GITHUB_REPO}
+      - OS_APOW_SENTINEL_BOT_LOGIN=${OS_APOW_SENTINEL_BOT_LOGIN}
+      - OS_APOW_SENTINEL_ID=sentinel-local-001
+      - OS_APOW_POLL_INTERVAL_SECONDS=60
+      - OS_APOW_HEARTBEAT_INTERVAL_SECONDS=300
+      - OS_APOW_LOG_LEVEL=DEBUG
+      - OS_APOW_LOG_FORMAT=text
+    volumes:
+      - ./src:/app/src:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      notifier:
+        condition: service_healthy
+    networks:
+      - os-apow-network
+
+networks:
+  os-apow-network:
+    driver: bridge
+    name: os-apow-network

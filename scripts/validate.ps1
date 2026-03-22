@@ -225,6 +225,28 @@ if ($Test) {
         }
     }
     else { Skip-Check 'bash tests' 'bash not available on this system' }
+
+    # Python tests (OS-APOW) — skip if uv not available
+    if ((Get-Command uv -ErrorAction SilentlyContinue) -and (Test-Path 'pyproject.toml')) {
+        Invoke-Check 'Python ruff lint' {
+            $output = uv run ruff check src tests 2>&1
+            if ($LASTEXITCODE -ne 0) { throw ($output -join "`n") }
+            Write-Host ($output -join "`n")
+        }
+
+        Invoke-Check 'Python ruff format check' {
+            $output = uv run ruff format --check src tests 2>&1
+            if ($LASTEXITCODE -ne 0) { throw ($output -join "`n") }
+            Write-Host ($output -join "`n")
+        }
+
+        Invoke-Check 'Python pytest' {
+            $output = uv run pytest tests -v 2>&1
+            if ($LASTEXITCODE -ne 0) { throw ($output -join "`n") }
+            Write-Host ($output -join "`n")
+        }
+    }
+    else { Skip-Check 'Python tests' 'uv not installed or pyproject.toml not found' }
 }
 
 # ---------------------------------------------------------------------------
