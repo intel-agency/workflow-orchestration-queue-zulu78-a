@@ -2,10 +2,11 @@
 Tests for OS-APOW Queue Service
 """
 
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
-from os_apow.models.work_item import TaskType, WorkItem, WorkItemStatus
+import pytest
+
+from os_apow.models.work_item import WorkItem
 from os_apow.services.queue import GitHubQueue, ITaskQueue
 
 

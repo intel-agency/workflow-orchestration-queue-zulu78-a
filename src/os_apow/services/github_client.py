@@ -67,7 +67,8 @@ class GitHubClient:
         url = f"{self._repo_url(repo_slug)}/issues/{issue_number}"
         response = await self._client.get(url)
         response.raise_for_status()
-        return response.json()
+        result: dict[str, Any] = response.json()
+        return result
 
     async def add_labels(
         self, repo_slug: str, issue_number: int, labels: list[str]
@@ -85,7 +86,8 @@ class GitHubClient:
         url = f"{self._repo_url(repo_slug)}/issues/{issue_number}/labels"
         response = await self._client.post(url, json={"labels": labels})
         response.raise_for_status()
-        return response.json()
+        result: dict[str, Any] = response.json()
+        return result
 
     async def remove_label(self, repo_slug: str, issue_number: int, label: str) -> dict[str, Any]:
         """Remove a label from an issue.
@@ -103,7 +105,8 @@ class GitHubClient:
         # 404 is acceptable (label already removed)
         if response.status_code not in (200, 204, 404):
             response.raise_for_status()
-        return response.json() if response.content else {}
+        result: dict[str, Any] = response.json() if response.content else {}
+        return result
 
     async def create_comment(self, repo_slug: str, issue_number: int, body: str) -> dict[str, Any]:
         """Create a comment on an issue.
@@ -119,7 +122,8 @@ class GitHubClient:
         url = f"{self._repo_url(repo_slug)}/issues/{issue_number}/comments"
         response = await self._client.post(url, json={"body": body})
         response.raise_for_status()
-        return response.json()
+        result: dict[str, Any] = response.json()
+        return result
 
     async def add_assignees(
         self, repo_slug: str, issue_number: int, assignees: list[str]
@@ -137,7 +141,8 @@ class GitHubClient:
         url = f"{self._repo_url(repo_slug)}/issues/{issue_number}/assignees"
         response = await self._client.post(url, json={"assignees": assignees})
         response.raise_for_status()
-        return response.json()
+        result: dict[str, Any] = response.json()
+        return result
 
     async def list_issues(
         self, repo_slug: str, labels: list[str] | None = None, state: str = "open"
@@ -159,4 +164,5 @@ class GitHubClient:
 
         response = await self._client.get(url, params=params)
         response.raise_for_status()
-        return response.json()
+        result: list[dict[str, Any]] = response.json()
+        return result

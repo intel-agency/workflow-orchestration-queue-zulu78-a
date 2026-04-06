@@ -7,7 +7,7 @@ Configures JSON-structured logging for Docker capture and observability.
 import json
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 
@@ -24,7 +24,7 @@ class JSONFormatter(logging.Formatter):
             JSON-formatted log string.
         """
         log_data: dict[str, Any] = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
@@ -63,7 +63,7 @@ class TextFormatter(logging.Formatter):
         Returns:
             Human-readable log string.
         """
-        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
         base = f"[{timestamp}] {record.levelname:8} {record.name}: {record.getMessage()}"
 
         if record.exc_info:

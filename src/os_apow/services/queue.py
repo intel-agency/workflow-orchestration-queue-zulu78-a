@@ -10,7 +10,7 @@ See: OS-APOW Simplification Report, S-1 / S-6
 
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -264,7 +264,7 @@ class GitHubQueue(ITaskQueue):
         comment_url = f"{url_issue}/comments"
         msg = (
             f"🚀 **Sentinel {sentinel_id}** has claimed this task.\n"
-            f"- **Start Time:** {datetime.now(timezone.utc).isoformat()}\n"
+            f"- **Start Time:** {datetime.now(UTC).isoformat()}\n"
             f"- **Environment:** `devcontainer-opencode.sh` initializing..."
         )
         await self._client.post(comment_url, json={"body": msg})
@@ -286,7 +286,7 @@ class GitHubQueue(ITaskQueue):
         msg = (
             f"💓 **Heartbeat** — Sentinel {sentinel_id} still working.\n"
             f"- **Elapsed:** {minutes}m\n"
-            f"- **Timestamp:** {datetime.now(timezone.utc).isoformat()}"
+            f"- **Timestamp:** {datetime.now(UTC).isoformat()}"
         )
         try:
             await self._client.post(comment_url, json={"body": msg})

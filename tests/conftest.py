@@ -5,9 +5,8 @@ Pytest configuration and shared fixtures.
 """
 
 import asyncio
-from collections.abc import AsyncGenerator, Generator
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from collections.abc import Generator
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 

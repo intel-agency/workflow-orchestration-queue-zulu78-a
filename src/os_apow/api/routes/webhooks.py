@@ -9,7 +9,7 @@ import hmac
 import logging
 from typing import Annotated, Any
 
-from fastapi import Body, Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
 
 from ...config import Settings, get_settings
 from ...models.work_item import TaskType, WorkItem, WorkItemStatus
@@ -61,7 +61,7 @@ def verify_webhook_signature(
 async def validate_webhook(
     request: Request,
     x_hub_signature_256: Annotated[str | None, Header()] = None,
-    settings: Annotated[Settings, Depends(get_settings)] = None,
+    settings: Settings = Depends(get_settings),
 ) -> bytes:
     """Dependency to validate webhook signature.
 

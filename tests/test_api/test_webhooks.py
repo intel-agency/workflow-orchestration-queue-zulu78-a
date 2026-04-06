@@ -4,14 +4,11 @@ Tests for OS-APOW Webhook Routes
 
 import hashlib
 import hmac
-import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 from os_apow.api.routes.webhooks import app, verify_webhook_signature
-from os_apow.models.work_item import WorkItemStatus
 
 
 class TestWebhookSignature:

@@ -8,10 +8,8 @@ heartbeat reporting.
 
 import asyncio
 import logging
-import subprocess
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
 
 from ..config import get_settings
 from ..models.work_item import WorkItem, WorkItemStatus
@@ -165,7 +163,7 @@ class SentinelWorker:
                 stderr=stderr,
             )
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return WorkerResult(
                 success=False,
                 exit_code=-1,
