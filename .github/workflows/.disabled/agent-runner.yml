@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       # 1. Prepare the Payload
       # We dump the GitHub event context to a JSON file.
@@ -30,7 +30,7 @@ jobs:
       # 2. Run Agent in DevContainer
       # uses: devcontainers/ci allows us to execute commands INSIDE the container
       - name: Execute Agent in DevContainer
-        uses: devcontainers/ci@v0.3
+        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3
         env:
           # Pass necessary API keys to the container
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
