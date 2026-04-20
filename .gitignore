@@ -425,3 +425,6 @@ docker/validation/results.jsonl
 docker/.env
 models.json
 test-results-pester.xml
+
+# Orchestrator runtime artifacts
+.assembled-orchestrator-prompt.md
