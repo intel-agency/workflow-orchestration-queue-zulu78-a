@@ -279,4 +279,143 @@ scope: repository
       <script name="scripts/update-remote-indices.ps1">Updates remote instruction module indices.</script>
     </scripts_directory>
   </available_tools>
+
+  <!-- ============================================================
+       OS-APOW Python Application
+       Headless agentic orchestration platform: FastAPI webhook
+       receiver, GitHub Issues as state, sentinel orchestrator,
+       devcontainer-based AI execution.
+       ============================================================ -->
+
+  <os_apow_overview>
+    <summary>
+      OS-APOW (Open Source — Agentic Process Orchestration Workflow) is the Python application
+      hosted in this repository. It is a headless agentic orchestration platform that transforms
+      GitHub Issues into automated execution orders for specialized AI agents.
+
+      The platform receives GitHub webhook events via a FastAPI endpoint (The Ear), stores task
+      state as labels on GitHub Issues (The State), polls for and dispatches queued work via a
+      background sentinel service (The Brain), and executes tasks inside devcontainers running
+      opencode agents (The Hands).
+    </summary>
+    <services>
+      <service name="notifier">FastAPI webhook receiver — validates incoming GitHub webhooks,
+        creates WorkItem entries, and enqueues them as GitHub Issues.</service>
+      <service name="sentinel">Background polling service — continuously scans for queued tasks,
+        claims them, spawns a devcontainer for execution, and reports results back to the Issue.</service>
+    </services>
+  </os_apow_overview>
+
+  <os_apow_setup>
+    <summary>Commands for setting up and running the Python application.</summary>
+    <commands>
+      <command>Install dependencies (including dev tools): `uv sync --extra dev`</command>
+      <command>Run the notifier service: `uv run python -m src.notifier_service` or `uv run notifier`</command>
+      <command>Run the sentinel service: `uv run python -m src.orchestrator_sentinel` or `uv run sentinel`</command>
+      <command>Run tests: `uv run pytest`</command>
+      <command>Run tests with coverage: `uv run pytest --cov`</command>
+      <command>Lint check: `uv run ruff check src/`</command>
+      <command>Format check: `uv run ruff format --check src/`</command>
+      <command>Type check: `uv run mypy src/`</command>
+      <command>Docker (both services): `docker compose up --build`</command>
+      <command>Docker (notifier only): `docker compose up notifier`</command>
+    </commands>
+    <environment>
+      <variable name="GITHUB_TOKEN">GitHub personal access token — required for sentinel queue operations.</variable>
+      <variable name="GITHUB_ORG">GitHub organization or user — required for sentinel to target a repo.</variable>
+      <variable name="GITHUB_REPO">Repository name — required for sentinel to target a repo.</variable>
+      <variable name="WEBHOOK_SECRET">Secret for validating GitHub webhook signatures (notifier service).</variable>
+      <variable name="SENTINEL_BOT_LOGIN">Optional bot login to filter out self-triggered events.</variable>
+    </environment>
+  </os_apow_setup>
+
+  <os_apow_project_structure>
+    <summary>Python application directory layout.</summary>
+    <layout>
+      ```
+      src/
+        __init__.py
+        notifier_service.py      # FastAPI webhook receiver (The Ear)
+        orchestrator_sentinel.py  # Background polling service (The Brain)
+        models/
+          __init__.py
+          work_item.py            # Unified WorkItem model + secret scrubber
+        queue/
+          __init__.py
+          github_queue.py         # GitHub Issues queue implementation (ITaskQueue + GitHubQueue)
+      tests/
+        __init__.py
+        models/
+          __init__.py
+          test_work_item.py       # WorkItem, enums, secret scrubbing tests
+        queue/
+          __init__.py
+          test_github_queue.py    # Queue interface and GitHubQueue tests
+        test_services.py          # Module importability and endpoint existence tests
+      pyproject.toml              # uv project config (deps, scripts, tool settings)
+      Dockerfile                  # Multi-stage Python build (builder + runtime)
+      docker-compose.yml          # notifier + sentinel services
+      .python-version             # Python 3.12
+      ```
+    </layout>
+  </os_apow_project_structure>
+
+  <os_apow_code_style>
+    <summary>Python code conventions enforced via tooling in pyproject.toml.</summary>
+    <rules>
+      <rule>Linting: ruff with rules E, W, F, I, UP, B, SIM, TCH, RUF (E501 ignored).</rule>
+      <rule>Formatting: ruff format with line-length 100.</rule>
+      <rule>Type checking: mypy strict mode (`disallow_untyped_defs`, `warn_return_any`).</rule>
+      <rule>Coverage: pytest-cov with 80%+ threshold (`fail_under = 80` in pyproject.toml).</rule>
+      <rule>Import ordering: isort-compatible via ruff's I rule set (`known-first-party = ["src"]`).</rule>
+      <rule>Python version target: 3.12 (set in ruff, mypy, and .python-version).</rule>
+      <rule>Test framework: pytest with pytest-asyncio (asyncio_mode = "auto").</rule>
+    </rules>
+  </os_apow_code_style>
+
+  <os_apow_testing>
+    <summary>Python testing instructions.</summary>
+    <commands>
+      <command>Full test suite: `uv run pytest`</command>
+      <command>With coverage report: `uv run pytest --cov`</command>
+      <command>Single test file: `uv run pytest tests/models/test_work_item.py`</command>
+      <command>Single test function: `uv run pytest tests/models/test_work_item.py::TestWorkItem::test_create_work_item`</command>
+      <command>Exclude integration tests: `uv run pytest -m "not integration"`</command>
+    </commands>
+    <conventions>
+      <convention>Test directory mirrors `src/` structure: `tests/models/`, `tests/queue/`, etc.</convention>
+      <convention>All test files follow `test_*.py` naming convention.</convention>
+      <convention>Coverage source is `src/` with branch coverage enabled.</convention>
+      <convention>Markers: `@pytest.mark.integration` for external-service tests, `@pytest.mark.slow` for slow tests.</convention>
+    </conventions>
+  </os_apow_testing>
+
+  <os_apow_architecture>
+    <summary>The Four Pillars of OS-APOW — the architectural model.</summary>
+    <pillars>
+      <pillar name="The Ear">
+        FastAPI webhook receiver (`src/notifier_service.py`). Validates incoming GitHub webhooks
+        (signature verification), parses the payload into a WorkItem, and enqueues it by creating
+        or updating a GitHub Issue with the `agent:queued` label.
+      </pillar>
+      <pillar name="The State">
+        GitHub Issues as distributed state (`src/queue/github_queue.py`). Task lifecycle is
+        represented by Issue labels: `agent:queued` → `agent:in-progress` → `agent:success` /
+        `agent:error`. Comments on the Issue serve as execution logs. This eliminates the need
+        for a separate database — GitHub itself is the state store.
+      </pillar>
+      <pillar name="The Brain">
+        Sentinel orchestrator (`src/orchestrator_sentinel.py`). A background polling service
+        that continuously scans for issues labeled `agent:queued`, claims them (label transition),
+        spawns a devcontainer for execution, monitors progress with heartbeats, and reports
+        final status back to the Issue. Implements exponential backoff and graceful shutdown.
+      </pillar>
+      <pillar name="The Hands">
+        DevContainer-based AI execution. The sentinel spawns a devcontainer running the opencode
+        CLI, which loads specialist agents from `.opencode/agents/` to perform the actual work.
+        The devcontainer provides an isolated, reproducible execution environment with all
+        necessary tools pre-installed.
+      </pillar>
+    </pillars>
+  </os_apow_architecture>
 </instructions>
